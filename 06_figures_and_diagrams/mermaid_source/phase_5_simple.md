@@ -23,17 +23,14 @@ flowchart TD
         DESC --> SENT --> TEST --> ML --> SYN
     end
 
-    FIND["Phase 5 Findings Package<br/>(rating disadvantage, lower sentiment,<br/>higher tipping salience, and preliminary<br/>classification signals)"]:::output
-
-    REC["Strategic Recommendations<br/>(actionable sponsor-facing takeaways<br/>based on the Phase 5 evidence)"]:::output
+    OUT(["Final project findings<br/>(comparative results,<br/>stakeholder implications,<br/>and recommendations)"]):::output
 
     D --> DESC
     G --> SENT
     G --> TEST
-    TEST --> FIND
-    ML --> FIND
-    SYN --> FIND
-    FIND --> REC
+    TEST --> OUT
+    ML --> OUT
+    SYN --> OUT
     WIDE -. "available upstream but not used" .-> SYN
 
     classDef proc fill:#EEF4FF,stroke:#3B6FB6,stroke-width:1.2px,color:#111;
@@ -45,6 +42,6 @@ flowchart TD
     class D data;
     class G cohort;
     class DESC,SENT,TEST,ML,SYN proc;
-    class FIND,REC output;
+    class OUT output;
     class WIDE note;
 ```
