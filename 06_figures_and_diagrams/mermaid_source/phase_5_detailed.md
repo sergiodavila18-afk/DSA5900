@@ -51,9 +51,7 @@ flowchart TD
         SYN -. "preserve scope limits" .-> LIMITS
     end
 
-    FIND["Phase 5 empirical findings package<br/>(descriptive patterns, inferential results,<br/>tipping-salience evidence, and preliminary<br/>treatment-classification signals)"]:::output
-
-    REC["Strategic recommendations<br/>(sponsor-facing interpretation and action logic<br/>grounded in the executed Phase 5 evidence)"]:::output
+    OUT(["Final project findings<br/>(comparative results,<br/>stakeholder implications,<br/>and recommendations)"]):::output
 
     %% =========================
     %% INPUT FEEDS
@@ -67,11 +65,10 @@ flowchart TD
     %% =========================
     %% OUTPUT LINKS
     %% =========================
-    INF --> FIND
-    TIPTEST --> FIND
-    ML --> FIND
-    SYN --> FIND
-    FIND --> REC
+    INF --> OUT
+    TIPTEST --> OUT
+    ML --> OUT
+    SYN --> OUT
 
     %% =========================
     %% STYLING
@@ -85,6 +82,6 @@ flowchart TD
     class D data;
     class G cohort;
     class LOAD,WC,NGRAM,OUTLIER,SENT,GROUPSUM,INF,TIPFLAG,TIPTEST,ML,SYN proc;
-    class FIND,REC output;
+    class OUT output;
     class WIDE,LIMITS note;
 ```
