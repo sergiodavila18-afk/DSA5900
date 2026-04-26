@@ -4,11 +4,96 @@ flowchart TD
     %% =========================
     %% EXTERNAL INPUTS
     %% =========================
+    T18["Historical treatment universe<br/>(18 verified JCS pilot stores with<br/>documented no-tipping windows)"]:::data
+    NP["Non-pilot JCS candidate universe<br/>(112 same-chain locations operating in the<br/>analytical window)"]:::data
+    EC["External competitor candidate universe<br/>(merged, normalized, audited candidate pool<br/>across the pilot markets)"]:::data
+
     C["Exploratory signal corpus<br/>(early LLM-assisted lexical signal table:<br/>tipping, service, price, food, fairness,<br/>ambiance, and related review cues)"]:::data
     LIT["Literature, sponsor guidance,<br/>and conceptual framing"]:::data
     S500["Sponsor benchmark source dataset<br/>(sample.csv, 500 reviews)"]:::data
-    D["Phase 2 master analytical dataset<br/>(16,997 review-level rows × 42 columns;<br/>review text + inherited metadata)"]:::data
     MODELSET["Model set<br/>(ChatGPT, Anthropic Claude, Google Gemini)"]:::data
+
+    %% =========================
+    %% PHASE 1
+    %% =========================
+    subgraph P1["Phase 1"]
+        direction TB
+
+        T13["Active primary treatment subset<br/>(retain 13 pilot stores in the strict<br/>same-chain analytical design;<br/>5 pilots excluded from the main analysis)"]:::proc
+
+        subgraph MATCH["Tier 1 internal same-chain design"]
+            direction TB
+
+            V1["Storefront topology<br/>(store form and trade-area setting)"]:::proc
+            V2["Historical review volume<br/>(baseline Yelp visibility and review ecosystem)"]:::proc
+            V3["Socioeconomic context<br/>(trade-area composition and local environment)"]:::proc
+            V4["Region and market-type context<br/>(geographic and market-class alignment)"]:::proc
+            V5["Row-level confidence and identity<br/>(verifiable storefront and unambiguous Yelp endpoint)"]:::proc
+
+            M1["Structured matching context<br/>(disciplined same-chain control derivation<br/>under one consistent feature space)"]:::proc
+
+            V1 --> M1
+            V2 --> M1
+            V3 --> M1
+            V4 --> M1
+            V5 --> M1
+        end
+
+        C1["Tier 1 strict internal controls<br/>(26 non-pilot JCS locations;<br/>group_type = internal_control,<br/>analysis_role = primary_internal,<br/>matched_pilot_id populated)"]:::proc
+
+        subgraph COMP["Tier 2 external competitor design"]
+            direction TB
+
+            E1["Normalize and deduplicate<br/>(merge reports, resolve address conflicts,<br/>and confirm storefront identity)"]:::proc
+
+            E2["Hard-gate screening<br/>(concept suitability, full-service model,<br/>historical operational relevance,<br/>review-footprint sufficiency,<br/>and geographic proximity)"]:::proc
+
+            E2X["Documented exclusions<br/>(record failed-gate candidates and<br/>preserve exclusion logic explicitly)"]:::note
+
+            E7["Locked Tier 2 cohort<br/>(22 official competitor rows;<br/>single audited external benchmark set)"]:::proc
+
+            E1 --> E2
+            E2 -- "pass all gates" --> E7
+            E2 -. "any gate fail" .-> E2X
+        end
+
+        FRAME1["Locked comparison frame<br/>(13 treatment + 26 Tier 1 + 22 Tier 2;<br/>39-location strict same-chain core plus<br/>parallel external benchmark)"]:::proc
+
+        T13 --> MATCH --> C1 --> FRAME1
+        E7 --> FRAME1
+    end
+
+    MAN["Locked location manifest<br/>(location_manifest_final.csv;<br/>61 active rows with direct /biz/ endpoints,<br/>group_type, chain_type, analysis_role,<br/>matched_pilot_id, and populated windows)"]:::output
+
+    MANQ["Operational-readiness verification<br/>(0 duplicate location_id values;<br/>0 missing URLs; all rows carry role logic,<br/>matched-pilot logic where applicable,<br/>and populated time-window fields;<br/>intentional T2_021 gap preserved)"]:::note
+
+    %% =========================
+    %% PHASE 2
+    %% =========================
+    subgraph P2["Phase 2"]
+        direction TB
+
+        EXT["PAD Main-flow extraction<br/>(row-anchored Yelp review-card extraction<br/>across all 61 manifest locations;<br/>browser setup → location loop → page loop → review rows)"]:::proc
+
+        RAW["Raw extraction artifact<br/>(RunningTable / ExtractedData.csv;<br/>one row per extracted review card<br/>with location-level source context)"]:::data
+
+        DUAL["Dual-path resolution and row normalization<br/>(resolve alternate review-text paths and<br/>alternate reaction-layout paths deterministically,<br/>rather than through one brittle selector)"]:::proc
+
+        PY["Python consolidation and cleanup<br/>(parse_reviews.py and parse_2.py convert PAD output<br/>into canonical review-level rows and stitch<br/>rating, date, and text into coherent records)"]:::proc
+
+        RECON["Cross-extraction reconciliation and gap recovery<br/>(mismatch.py compares extraction paths and recovers<br/>reviews captured on one path but missed on the other,<br/>producing one consolidated set rather than two rivals)"]:::proc
+
+        INHERIT["Manifest inheritance and analytical labeling<br/>(join cleaned review rows back to the manifest so every row<br/>carries location_id, group_type, analysis_role,<br/>matched_pilot_id, and policy-window fields)"]:::proc
+
+        VERIFY["Final consolidation and quality verification<br/>(coverage, identity, review_key deduplication,<br/>date integrity, and operational-readiness checks)"]:::proc
+
+        QA2["Documented limitations and run notes<br/>(is_elite unusable in this release;<br/>reaction counts empty; reviewer_seafood_review_count unpopulated)"]:::note
+
+        EXT --> RAW --> DUAL --> PY --> RECON --> INHERIT --> VERIFY
+        VERIFY -. "preserve known field limitations" .-> QA2
+    end
+
+    MASTER["Master analytical dataset<br/>(consolidated_cleaned_reviews.csv;<br/>16,997 review-level rows × 42 columns;<br/>13 / 26 / 22 coverage preserved;<br/>single execution input for later phases)"]:::output
 
     %% =========================
     %% PHASE 3
@@ -48,13 +133,6 @@ flowchart TD
     CANON["Final canonical taxonomy<br/>(40-attribute layer after feature selection,<br/>construct compression, and merge interpretation)"]:::output
 
     PKG["Frozen rule package<br/>(canonical 40-attribute set, definitions,<br/>prompt files, schemas, scoring logic,<br/>and benchmark-linked evaluation basis)"]:::output
-
-    SCORE --> GOLD
-    GOLD --> REDUCE
-    MERGE --> CANON
-    CANON --> ALIGN
-    GOLD --> ALIGN
-    ALIGN --> PKG
 
     %% =========================
     %% PHASE 4
@@ -116,30 +194,53 @@ flowchart TD
 
     WB["Validated scored-attribute database<br/>(locked attributes, consolidated factors,<br/>final scalar scores, and retained provider traces)"]:::output
 
-    M["Modeling-ready table / panel<br/>(join review metadata + validated scored attributes +<br/>cohort identity + regime labels into one clean handoff file)"]:::output
+    M4["Modeling-ready table / panel<br/>(join review metadata + validated scored attributes +<br/>cohort identity + regime labels into one clean handoff file)"]:::output
 
-    AUDIT["Run log and audit tables<br/>(review IDs, provider outputs by pass,<br/>comparison tables, deterministic resolutions,<br/>factor math, and file lineage)"]:::note
-
-    CONS3 --> WB --> M
-    D -. "merge source review metadata" .-> M
-
-    ORCH -. "log run state" .-> AUDIT
-    CONS1 -. "log Pass 1 comparison table" .-> AUDIT
-    TIER -. "log deterministic resolutions" .-> AUDIT
-    CONS2 -. "log locked attributes" .-> AUDIT
-    CONS3 -. "log factor math and final scores" .-> AUDIT
-    WB -. "retain final provider traces" .-> AUDIT
+    AUDIT4["Run log and audit tables<br/>(review IDs, provider outputs by pass,<br/>comparison tables, deterministic resolutions,<br/>factor math, and file lineage)"]:::note
 
     %% =========================
-    %% INPUT FEEDS
+    %% CROSS-PHASE HANDOFFS
     %% =========================
+    T18 --> T13
+    T18 --> COMP
+    NP --> V1
+    NP --> V2
+    NP --> V3
+    NP --> V4
+    NP --> V5
+    EC --> E1
+
+    FRAME1 --> MAN
+    MAN -. "execution-ready Phase 2 handoff" .-> MANQ
+
+    MAN --> EXT
+    MAN --> INHERIT
+    VERIFY --> MASTER
+
     C --> TAX97
     LIT --> TAX97
     S500 --> SAMP
-    D --> ALIGN
-    D --> ORCH
+    SCORE --> GOLD
+    GOLD --> REDUCE
+    MERGE --> CANON
+    CANON --> ALIGN
+    GOLD --> ALIGN
+    MASTER --> ALIGN
+    ALIGN --> PKG
+
+    MASTER --> ORCH
     PKG --> ORCH
     MODELSET --> ORCH
+
+    CONS3 --> WB --> M4
+    MASTER -. "merge source review metadata" .-> M4
+
+    ORCH -. "log run state" .-> AUDIT4
+    CONS1 -. "log Pass 1 comparison table" .-> AUDIT4
+    TIER -. "log deterministic resolutions" .-> AUDIT4
+    CONS2 -. "log locked attributes" .-> AUDIT4
+    CONS3 -. "log factor math and final scores" .-> AUDIT4
+    WB -. "retain final provider traces" .-> AUDIT4
 
     %% =========================
     %% STYLING
@@ -150,9 +251,9 @@ flowchart TD
     classDef output fill:#EAFBF0,stroke:#2E8B57,stroke-width:1.4px,color:#111;
     classDef note fill:#F5F5F5,stroke:#757575,stroke-width:1px,color:#111,stroke-dasharray: 4 4;
 
-    class C,LIT,S500,D,MODELSET data;
-    class TAX97,SAMP,CAT,ATTR,SCORE,REDUCE,MERGE,ALIGN,ORCH,CONS1,TIER,CONS2,P3PACK,CONS3 proc;
-    class GOLD,CANON,PKG,WB,M output;
+    class T18,NP,EC,C,LIT,S500,MODELSET,RAW data;
+    class T13,V1,V2,V3,V4,V5,M1,C1,E1,E2,E7,FRAME1,EXT,DUAL,PY,RECON,INHERIT,VERIFY,TAX97,SAMP,CAT,ATTR,SCORE,REDUCE,MERGE,ALIGN,ORCH,CONS1,TIER,CONS2,P3PACK,CONS3 proc;
+    class MAN,MASTER,GOLD,CANON,PKG,WB,M4 output;
+    class E2X,MANQ,QA2,AUDIT4 note;
     class P1A,P1B,P1C,P2A,P2B,P2C,P3A,P3B,P3C llm;
-    class AUDIT note;
 ```
