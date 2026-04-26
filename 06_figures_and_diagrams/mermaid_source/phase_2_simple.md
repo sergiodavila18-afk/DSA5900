@@ -27,4 +27,4 @@ flowchart TD
     class MAN data;
     class EXT,PROC,LABEL proc;
     class MASTER output;
-```mermaid
+```
