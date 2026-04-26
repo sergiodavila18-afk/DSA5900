@@ -91,6 +91,29 @@ flowchart TD
     OUT4["Phase 4 outputs<br/>(validated scored-attribute database +<br/>modeling-ready analytical table)"]:::output
 
     %% =========================
+    %% PHASE 5
+    %% =========================
+    subgraph P5["Phase 5"]
+        direction TB
+
+        DESC["Corpus Inspection and Lexical Exploration<br/>(data loading, word cloud,<br/>n-grams, and anomaly review)"]:::proc
+
+        SENT["Sentiment and Group Summaries<br/>(TextBlob polarity, sentiment categories,<br/>ratings, and grouped descriptive patterns)"]:::proc
+
+        TEST["Formal Group Comparisons<br/>(ANOVA, t-tests, tipping-mention rates,<br/>z-test, and conditional tipping comparisons)"]:::proc
+
+        ML["Preliminary Interpretable ML<br/>(decision tree and random forest<br/>for treatment-classification signals)"]:::proc
+
+        SYN["Findings Synthesis and Scope Boundaries<br/>(integrate descriptive, inferential,<br/>and classifier evidence)"]:::proc
+
+        DESC --> SENT --> TEST --> ML --> SYN
+    end
+
+    FIND["Phase 5 Findings Package<br/>(rating disadvantage, lower sentiment,<br/>higher tipping salience, and preliminary<br/>classification signals)"]:::output
+
+    REC["Strategic Recommendations<br/>(actionable sponsor-facing takeaways<br/>based on the Phase 5 evidence)"]:::output
+
+    %% =========================
     %% CROSS-PHASE HANDOFFS
     %% =========================
     T18 --> T13
@@ -111,6 +134,13 @@ flowchart TD
     MODELSET --> ORCH
     CONS --> OUT4
 
+    MASTER --> DESC
+    OUT4 -. "available upstream but not used in executed Phase 5 analysis" .-> SYN
+    TEST --> FIND
+    ML --> FIND
+    SYN --> FIND
+    FIND --> REC
+
     %% =========================
     %% STYLING
     %% =========================
@@ -120,7 +150,7 @@ flowchart TD
     classDef output fill:#EAFBF0,stroke:#2E8B57,stroke-width:1.4px,color:#111;
 
     class T18,NP,EC,C,S500,MODELSET data;
-    class T13,C1,C2,FRAME1,EXT,PROC,LABEL,FRAME3,BENCH,REDUCE,ORCH,RES,CONS proc;
-    class MAN,MASTER,OUT3,OUT4 output;
+    class T13,C1,C2,FRAME1,EXT,PROC,LABEL,FRAME3,BENCH,REDUCE,ORCH,RES,CONS,DESC,SENT,TEST,ML,SYN proc;
+    class MAN,MASTER,OUT3,OUT4,FIND,REC output;
     class P1RUN,P2RUN,P3RUN llm;
 ```
