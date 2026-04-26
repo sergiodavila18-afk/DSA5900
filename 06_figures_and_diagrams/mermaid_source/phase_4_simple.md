@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 
     D["Phase 2 Master Dataset<br/>(16,997 reviews)"]:::data
@@ -36,3 +37,4 @@ flowchart TD
     class ORCH,RES,CONS proc;
     class P1,P2,P3 llm;
     class OUT output;
+```
