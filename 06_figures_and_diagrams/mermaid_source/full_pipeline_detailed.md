@@ -199,6 +199,53 @@ flowchart TD
     AUDIT4["Run log and audit tables<br/>(review IDs, provider outputs by pass,<br/>comparison tables, deterministic resolutions,<br/>factor math, and file lineage)"]:::note
 
     %% =========================
+    %% PHASE 5
+    %% =========================
+    subgraph P5["Phase 5"]
+        direction TB
+
+        LOAD["Data loading and inspection<br/>(load CSV in Colab, parse dates,<br/>confirm shape and columns,<br/>inspect sample review records)"]:::proc
+
+        subgraph LEX["Lexical exploration"]
+            direction TB
+
+            WC["Word cloud generation<br/>(corpus-wide orientation to dominant<br/>review-language surface)"]:::proc
+
+            NGRAM["N-gram analysis<br/>(top n-grams from length 2 through 7<br/>to identify recurring lexical patterns)"]:::proc
+
+            OUTLIER["Outlier review check<br/>(trace repeated-token anomaly<br/>to one extreme negative review)"]:::proc
+
+            WC --> NGRAM --> OUTLIER
+        end
+
+        SENT5["TextBlob sentiment scoring<br/>(continuous polarity + three-level sentiment category:<br/>positive, negative, neutral)"]:::proc
+
+        G5["Executed analytical grouping<br/>(treatment = 1,577;<br/>internal_control = 7,003;<br/>external_competitor = 8,417)"]:::cohort
+
+        GROUPSUM["Grouped descriptive summaries<br/>(mean rating and mean polarity by group,<br/>plus rating-by-sentiment-category comparisons)"]:::proc
+
+        INF["Inferential testing<br/>(ANOVA and pairwise t-tests on rating and sentiment<br/>across treatment, internal control,<br/>and external competitor groups)"]:::proc
+
+        TIPFLAG["Tipping-mention detector<br/>(binary flag from review_text<br/>using case-insensitive substring search for 'tip')"]:::proc
+
+        TIPTEST["Tipping-mention analysis<br/>(groupwise tipping-discussion rates,<br/>two-proportion z-test, and conditional<br/>treatment-vs-control comparisons within<br/>the tipping-mention subset)"]:::proc
+
+        ML5["Preliminary supervised classification<br/>(decision tree and random forest;<br/>null analysis, class weighting,<br/>and cross-validation added later)"]:::proc
+
+        SYN5["Findings synthesis<br/>(treatment underperforms on rating and sentiment;<br/>tipping is discussed much more often in treatment;<br/>tipping-discussing reviews are more negative in every group;<br/>conditional treatment-vs-control gap disappears within the<br/>tipping-mention subset; tipping is highly predictive in early ML)"]:::proc
+
+        LIMITS5["Documented Phase 5 boundaries<br/>(TextBlob-based sentiment only;<br/>coarse tipping detection; no difference-in-differences;<br/>classifier diagnostics incomplete;<br/>canonical 40-attribute layer not yet integrated)"]:::note
+
+        LOAD --> LEX --> SENT5 --> GROUPSUM --> INF
+        INF --> TIPFLAG --> TIPTEST --> ML5 --> SYN5
+        SYN5 -. "preserve scope limits" .-> LIMITS5
+    end
+
+    FIND5["Phase 5 empirical findings package<br/>(descriptive patterns, inferential results,<br/>tipping-salience evidence, and preliminary<br/>treatment-classification signals)"]:::output
+
+    REC5["Strategic recommendations<br/>(sponsor-facing interpretation and action logic<br/>grounded in the executed Phase 5 evidence)"]:::output
+
+    %% =========================
     %% CROSS-PHASE HANDOFFS
     %% =========================
     T18 --> T13
@@ -242,18 +289,33 @@ flowchart TD
     CONS3 -. "log factor math and final scores" .-> AUDIT4
     WB -. "retain final provider traces" .-> AUDIT4
 
+    MASTER --> LOAD
+    MASTER -. "group labels define executed grouping" .-> G5
+    G5 --> GROUPSUM
+    G5 --> INF
+    G5 --> TIPTEST
+    M4 -. "available upstream but not used in executed analysis" .-> LIMITS5
+
+    INF --> FIND5
+    TIPTEST --> FIND5
+    ML5 --> FIND5
+    SYN5 --> FIND5
+    FIND5 --> REC5
+
     %% =========================
     %% STYLING
     %% =========================
     classDef llm fill:#F6E9FF,stroke:#7B3FC6,stroke-width:1.4px,color:#111;
     classDef proc fill:#EEF4FF,stroke:#3B6FB6,stroke-width:1.2px,color:#111;
     classDef data fill:#F8FAFC,stroke:#5B6573,stroke-width:1.2px,color:#111;
+    classDef cohort fill:#FFF8E1,stroke:#FFB300,stroke-width:1.5px,color:#111;
     classDef output fill:#EAFBF0,stroke:#2E8B57,stroke-width:1.4px,color:#111;
     classDef note fill:#F5F5F5,stroke:#757575,stroke-width:1px,color:#111,stroke-dasharray: 4 4;
 
     class T18,NP,EC,C,LIT,S500,MODELSET,RAW data;
-    class T13,V1,V2,V3,V4,V5,M1,C1,E1,E2,E7,FRAME1,EXT,DUAL,PY,RECON,INHERIT,VERIFY,TAX97,SAMP,CAT,ATTR,SCORE,REDUCE,MERGE,ALIGN,ORCH,CONS1,TIER,CONS2,P3PACK,CONS3 proc;
-    class MAN,MASTER,GOLD,CANON,PKG,WB,M4 output;
-    class E2X,MANQ,QA2,AUDIT4 note;
+    class T13,V1,V2,V3,V4,V5,M1,C1,E1,E2,E7,FRAME1,EXT,DUAL,PY,RECON,INHERIT,VERIFY,TAX97,SAMP,CAT,ATTR,SCORE,REDUCE,MERGE,ALIGN,ORCH,CONS1,TIER,CONS2,P3PACK,CONS3,LOAD,WC,NGRAM,OUTLIER,SENT5,GROUPSUM,INF,TIPFLAG,TIPTEST,ML5,SYN5 proc;
+    class G5 cohort;
+    class MAN,MASTER,GOLD,CANON,PKG,WB,M4,FIND5,REC5 output;
+    class E2X,MANQ,QA2,AUDIT4,LIMITS5 note;
     class P1A,P1B,P1C,P2A,P2B,P2C,P3A,P3B,P3C llm;
 ```
