@@ -14,13 +14,14 @@ flowchart TD
 
         REDUCE["Taxonomy Reduction<br/>(feature pruning, merge and drop logic,<br/>canonical consolidation to 40 attributes)"]:::proc
 
-        OUT["Outputs<br/>(human-coded benchmark assets +<br/>frozen 40-attribute rule package<br/>for downstream application)"]:::output
-
-        FRAME --> BENCH --> REDUCE --> OUT
+        FRAME --> BENCH --> REDUCE
     end
+
+    OUT["Outputs<br/>(human-coded benchmark assets +<br/>frozen 40-attribute rule package<br/>for downstream application)"]:::output
 
     C --> FRAME
     S500 --> BENCH
+    REDUCE --> OUT
     D -. "downstream alignment target" .-> OUT
 
     classDef proc fill:#EEF4FF,stroke:#3B6FB6,stroke-width:1.2px,color:#111;
