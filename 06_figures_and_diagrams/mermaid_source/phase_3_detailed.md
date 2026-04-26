@@ -28,29 +28,32 @@ flowchart TD
 
             SCORE["Three-stage human sentiment scoring<br/>(sign assignment, broad-band placement,<br/>and exact-integer scoring at the<br/>review-attribute level)"]:::proc
 
-            GOLD["Human-coded benchmark assets<br/>(100 reviews and 646 scored attribute instances;<br/>benchmark for later AI evaluation)"]:::output
-
-            SAMP --> CAT --> ATTR --> SCORE --> GOLD
+            SAMP --> CAT --> ATTR --> SCORE
         end
 
         REDUCE["Taxonomy reduction and consolidation<br/>(39 KEEP, 19 MERGE, 38 DROP;<br/>reduce dimensionality, sparsity, redundancy,<br/>and weak-fit constructs using corpus prevalence,<br/>scored frequency, overall-satisfaction association,<br/>marker overlap, domain fit, and construct validity)"]:::proc
 
         MERGE["Canonical merge mapping and survivor logic<br/>(resolve aliases and umbrella survivors,<br/>compress overlapping constructs,<br/>and preserve only production-valid attribute IDs)"]:::proc
 
-        CANON["Final canonical taxonomy<br/>(40-attribute layer after feature selection,<br/>construct compression, and merge interpretation)"]:::output
-
         ALIGN["Production-facing packaging and alignment<br/>(prepare canonical definitions, benchmark assets,<br/>and scoring-rule infrastructure for later application<br/>to the Phase 2 master dataset)"]:::proc
-
-        RULES["Structured taxonomy and scoring assets<br/>(canonical attribute layer, definitions,<br/>benchmark-linked evaluation basis,<br/>and frozen production-facing rule package)"]:::output
 
         TAX97 --> BENCH
         TAX97 --> REDUCE
-        GOLD --> REDUCE
-        REDUCE --> MERGE --> CANON
-        CANON --> ALIGN
-        GOLD --> ALIGN
-        ALIGN --> RULES
+        REDUCE --> MERGE
     end
+
+    GOLD["Human-coded benchmark assets<br/>(100 reviews and 646 scored attribute instances;<br/>benchmark for later AI evaluation)"]:::output
+
+    CANON["Final canonical taxonomy<br/>(40-attribute layer after feature selection,<br/>construct compression, and merge interpretation)"]:::output
+
+    RULES["Structured taxonomy and scoring assets<br/>(canonical attribute layer, definitions,<br/>benchmark-linked evaluation basis,<br/>and frozen production-facing rule package)"]:::output
+
+    SCORE --> GOLD
+    GOLD --> REDUCE
+    MERGE --> CANON
+    CANON --> ALIGN
+    GOLD --> ALIGN
+    ALIGN --> RULES
 
     %% =========================
     %% INPUT FEEDS
